@@ -9,6 +9,7 @@ variables and Django settings (although this is not Django-dependent).
    :caption: Contents:
 
    installation
+   presets
    contributing
 
 

@@ -1,14 +1,61 @@
+import ctypes
+import inspect
+from contextlib import contextmanager
 from io import StringIO
 from os import environ
 from pathlib import Path
-from typing import Any, Optional, Union
+from typing import Any, MutableMapping, Optional, Union
 
 from yaml import YAMLError, safe_load
 
 from ._dotenv import load_dotenv
 from ._exceptions import ImproperlyConfigured
+from ._preset import Preset
 
 no_default = object()
+
+
+@contextmanager
+def get_caller_locals(context: Optional[MutableMapping[str, Any]] = None):
+    """
+    That's a context manager that allows you to get the locals of your caller
+    and to modify it. It's CPython-dependent, uses black magic and is overall
+    not necessarily a good idea. However, it's useful to make some preset
+    mechanism for the Django settings.
+
+    >>> with get_caller_locals() as ctx:
+    >>>     ctx['yolo'] = 42  # setting `yolo = 42` in the caller's locals
+
+    In case you don't want to use this magic, you can always give "context"
+    which will be considered as the locals you want. You could do:
+
+    >>> def do_something(my_locals):
+    >>>     with get_caller_locals(my_locals) as ctx:
+    >>>         ctx['yolo'] = 42
+    >>>
+    >>> do_something(locals())
+
+    Parameters
+    ----------
+    context
+        Optional locals that you want to modify. By default will use the
+        caller's locals.
+    """
+
+    frame = None
+
+    if context is None:
+        stack = inspect.stack(0)
+        caller = stack[3]
+        frame = caller.frame
+        upper_locals = caller.frame.f_locals
+    else:
+        upper_locals = context
+
+    yield upper_locals
+
+    if frame:
+        ctypes.pythonapi.PyFrame_LocalsToFast(ctypes.py_object(frame), ctypes.c_int(0))
 
 
 class EnvManager:
@@ -34,15 +81,19 @@ class EnvManager:
 
     def __init__(
         self,
+        preset: Preset = None,
         dotenv_path: Union[str, Path, None, bool] = None,
         assume_yaml: bool = False,
         build_mode_var: str = "BUILD_MODE",
+        locals_to_change: Optional[MutableMapping[str, Any]] = None,
     ) -> None:
         """
         Constructs the object
 
         Parameters
         ----------
+        preset
+            A preset implementation
         dotenv_path
             Optional path to the .env to load before going further.
                 - If set to a path, this path will be loaded
@@ -56,6 +107,11 @@ class EnvManager:
             defaults, which are not the regular defaults. This gives the name
             if the (YAML-parsed) environment variable which indicates that we
             are in build mode.
+        locals_to_change
+            Presets are allowed to change locals. By default it will do some
+            black magic to access the invoking frame and modify its context.
+            However if you want to manually specify the locals to be changed,
+            you can use this.
         """
 
         self.dotenv_path = dotenv_path
@@ -64,6 +120,8 @@ class EnvManager:
         self.missing = set()
         self.syntax_error = set()
         self.read = {}
+        self.preset = preset
+        self.locals_to_change = locals_to_change
 
     def __enter__(self):
         """
@@ -71,6 +129,11 @@ class EnvManager:
         """
 
         self.load_dotenv()
+
+        if self.preset is not None:
+            with get_caller_locals(self.locals_to_change) as context:
+                self.preset.pre(self, context)
+
         return self
 
     def __exit__(self, *_):
@@ -78,6 +141,10 @@ class EnvManager:
         Upon exit, if any value failed to be configured then raise an error
         listing all that is wrong.
         """
+
+        if self.preset is not None:
+            with get_caller_locals(self.locals_to_change) as context:
+                self.preset.post(self, context)
 
         self.raise_parse_fail()
 

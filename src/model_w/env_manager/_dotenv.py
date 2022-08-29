@@ -1,7 +1,8 @@
 import re
+from pathlib import Path
 from typing import Iterator, Optional, Tuple, Union
 
-from dotenv.main import DotEnv, _PathLike, find_dotenv
+from dotenv.main import DotEnv, find_dotenv
 from dotenv.parser import parse_stream
 
 SET_A = re.compile(r"^\s*set\s+-a\s*$")
@@ -40,7 +41,7 @@ class WDotEnv(DotEnv):
         return getattr(self, "_error_lines", [])
 
 
-def load_dotenv(dotenv_path: Union[str, _PathLike, None] = None) -> bool:
+def load_dotenv(dotenv_path: Union[str, Path, None] = None) -> bool:
     """
     Finds, parses and loads as default the .env file for this project.
 
