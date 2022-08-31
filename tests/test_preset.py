@@ -1,7 +1,7 @@
 from os import environ
 from typing import Any, MutableMapping
 
-from model_w.env_manager import EnvManager, Preset, ComposePreset
+from model_w.env_manager import AutoPreset, ComposePreset, EnvManager, Preset
 
 
 class FooPreset(Preset):
@@ -36,6 +36,17 @@ class I18nPreset(Preset):
 
     def post(self, env: "EnvManager", context: MutableMapping[str, Any]):
         context["LANGUAGE_CODE"] = context["LANGUAGES"][0][0]
+
+
+class FooFoo(AutoPreset):
+    def pre_foo(self):
+        yield "FOO", 42
+
+    def pre_bar(self):
+        yield "BAR", 24
+
+    def post_foo_bar(self, context: MutableMapping[str, Any]):
+        yield "FOO_BAR", context["FOO"] + context["BAR"]
 
 
 def test_get_context():
@@ -82,3 +93,16 @@ def test_doc():
     assert LANGUAGE_CODE == "en"
     assert USE_I18N == True
     assert TIME_ZONE == "UTC"
+
+
+def test_auto_preset():
+    FOO = None
+    BAR = None
+    FOO_BAR = None
+
+    with EnvManager(FooFoo()):
+        pass
+
+    assert FOO == 42
+    assert BAR == 24
+    assert FOO_BAR == 66

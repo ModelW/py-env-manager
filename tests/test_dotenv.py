@@ -1,7 +1,7 @@
 from os import environ
+from tempfile import NamedTemporaryFile
 
 from model_w.env_manager import EnvManager
-from tempfile import NamedTemporaryFile
 
 
 def test_load():

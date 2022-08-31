@@ -95,3 +95,35 @@ with EnvManager(ComposePreset(I18nPreset(), TzPreset('UTC'))):
         ("fr", "French"),
     ]
 ```
+
+## Auto Preset
+
+Another way to split concerns is to use the `AutoPreset` helper, which will
+automatically introspect your sub-class and call functions respecting a
+given convention.
+
+For example, this demo preset:
+
+```python
+from model_w.env_manager import AutoPreset
+
+class FooFoo(AutoPreset):
+    def pre_foo(self):
+        yield 'FOO', 42
+
+    def pre_bar(self):
+        yield 'BAR', 24
+
+    def post_foo_bar(self, context):
+        yield 'FOO_BAR', context['FOO'] + context['BAR']
+```
+
+All you need to do is:
+
+- Inherit from `AutoPreset`
+- Put your code in methods named `pre_*` or `post_*` (based on when you want to
+  execute your code)
+- Yield all tuples of (key, value) that you want to define in the configuration
+
+Optionally you can ask for `env` or `context` in your arguments and they will
+be injected for you.
