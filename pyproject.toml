@@ -1,11 +1,11 @@
 [tool.poetry]
 name = "modelw-env-manager"
-version = "1.0.0-alpha.1"
+version = "1.0.0-alpha.2"
 packages = [
     {  include = "model_w/env_manager", from = "src" }
 ]
 
-description = "A Django emailing/texting utility"
+description = "A tool to simplify reading environment variables and .env files"
 authors = ["Rémy Sanchez <remy.sanchez@hyperthese.net>"]
 license = "WTFPL"
 classifiers = [
@@ -35,6 +35,7 @@ python-dotenv = "^0.11.0"
 [tool.poetry.dev-dependencies]
 isort = "*"
 black = "*"
+pytest = "^7.1.2"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
