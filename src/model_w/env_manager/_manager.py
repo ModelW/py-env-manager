@@ -12,7 +12,20 @@ from ._dotenv import load_dotenv
 from ._exceptions import ImproperlyConfigured
 from ._preset import Preset
 
-no_default = object()
+# This is a special constant that indicates the lack of default value in the
+# get() function below. The weird syntax here is to make sure that the object
+# is bool-ish but also without needing to create a class for this purpose as
+# otherwise it would be possible to make another instance. The way to use this
+# is to do `if my_var is no_default: ...`, which checks if the value is exactly
+# this instance.
+no_default = type(
+    "NoDefault",
+    (object,),
+    dict(
+        __bool__=lambda _: False,
+        __repr__=lambda _: "no_default",
+    ),
+)()
 
 
 @contextmanager
