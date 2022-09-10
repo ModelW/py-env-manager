@@ -22,4 +22,4 @@ def test_load():
 
 
 def test_find_dotenv():
-    assert find_dotenv('dotenv.txt') == Path(__file__).parent / 'dotenv.txt'
+    assert find_dotenv("dotenv.txt") == Path(__file__).parent / "dotenv.txt"

@@ -1,6 +1,6 @@
+import inspect
 import re
 import sys
-import inspect
 from pathlib import Path
 from typing import Iterator, Optional, Tuple, Union
 
@@ -43,7 +43,7 @@ class WDotEnv(DotEnv):
         return getattr(self, "_error_lines", [])
 
 
-def find_dotenv(file_name: str = '.env') -> Optional[Path]:
+def find_dotenv(file_name: str = ".env") -> Optional[Path]:
     """
     The algorithm from the original find_dotenv is not working for our case so
     we're coding it again here.
@@ -77,7 +77,7 @@ def find_dotenv(file_name: str = '.env') -> Optional[Path]:
                 if parent not in candidates:
                     candidates.add(parent)
 
-    for candidate in sorted(candidates, key=lambda c: len(c), reverse=True):
+    for candidate in sorted(candidates, key=lambda c: len(f"{c}"), reverse=True):
         if (out := candidate / file_name).exists():
             return out
 
