@@ -1,8 +1,10 @@
 import re
+import sys
+import inspect
 from pathlib import Path
 from typing import Iterator, Optional, Tuple, Union
 
-from dotenv.main import DotEnv, find_dotenv
+from dotenv.main import DotEnv
 from dotenv.parser import parse_stream
 
 SET_A = re.compile(r"^\s*set\s+-a\s*$")
@@ -39,6 +41,45 @@ class WDotEnv(DotEnv):
         """
 
         return getattr(self, "_error_lines", [])
+
+
+def find_dotenv(file_name: str = '.env') -> Optional[Path]:
+    """
+    The algorithm from the original find_dotenv is not working for our case so
+    we're coding it again here.
+
+    The idea is to move up the stack trace and find all files that are not
+    children of the virtual environment. For each of those "developer files" we
+    go up until the root, looking for the closest .env file we can find.
+
+    Notes
+    -----
+    In order to find the "closest" file we look at the length of the file's
+    path. The longest path wins. If there are several locations of "developer
+    files" that's how we decide which "root" to pick from. All this is
+    entirely heuristic and definitely not recommended in production.
+
+    Parameters
+    ----------
+    file_name
+        Name of the `.env` file you're looking for. Defaults to `.env` but can
+        be anything.
+    """
+
+    prefix = Path(sys.prefix)
+    candidates = set()
+
+    for frame in inspect.stack(0):
+        file = Path(frame.filename)
+
+        if prefix not in file.parents:
+            for parent in file.parents:
+                if parent not in candidates:
+                    candidates.add(parent)
+
+    for candidate in sorted(candidates, key=lambda c: len(c), reverse=True):
+        if (out := candidate / file_name).exists():
+            return out
 
 
 def load_dotenv(dotenv_path: Union[str, Path, None] = None) -> bool:
