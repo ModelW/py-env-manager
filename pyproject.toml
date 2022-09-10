@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "modelw-env-manager"
-version = "1.0.0-alpha.3"
+version = "1.0.0-alpha.4"
 packages = [
     {  include = "model_w/env_manager", from = "src" }
 ]
