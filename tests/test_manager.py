@@ -21,3 +21,12 @@ def test_no_default():
 
     assert no_default.__bool__() is False
     assert not no_default
+
+    assert no_default == no_default
+
+
+def test_signature_mismatch():
+    with raises(ImproperlyConfigured):
+        with EnvManager() as env:
+            env.get("FOO", default="foo")
+            env.get("FOO", default="foo", is_yaml=True)

@@ -12,9 +12,6 @@ def test_load():
         f.flush()
 
         with EnvManager(dotenv_path=f.name) as env:
-            fbb = env.get("FOO_BAR_BAZ")
-            assert fbb == "42"
-
             fbb = env.get("FOO_BAR_BAZ", is_yaml=True)
             assert fbb == 42
 
