@@ -78,7 +78,7 @@ def find_dotenv(file_name: str = ".env") -> Optional[Path]:
                     candidates.add(parent)
 
     for candidate in sorted(candidates, key=lambda c: (len(f"{c}"), c), reverse=True):
-        if (out := candidate / file_name).exists():
+        if (out := candidate / file_name).is_file():
             return out
 
 
