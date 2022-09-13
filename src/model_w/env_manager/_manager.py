@@ -262,6 +262,8 @@ class EnvManager:
             parts.append(f' Syntax error: {", ".join(self.syntax_error)}.')
 
         if self.signature_mismatch:
-            parts.append(f' get() calls mismatch: {", ".join(self.signature_mismatch)}.')
+            parts.append(
+                f' get() calls mismatch: {", ".join(self.signature_mismatch)}.'
+            )
 
         raise ImproperlyConfigured("".join(parts))
