@@ -1,4 +1,5 @@
 import inspect
+import os
 import re
 import sys
 from pathlib import Path
@@ -31,7 +32,7 @@ class WDotEnv(DotEnv):
                 if binding.error:
                     if not SET_A.match(binding.original.string):
                         self.error_lines.append(binding.original)
-                else:
+                elif binding.key:
                     yield binding.key, binding.value
 
     @property
@@ -66,13 +67,17 @@ def find_dotenv(file_name: str = ".env") -> Optional[Path]:
         be anything.
     """
 
-    prefix = Path(sys.prefix)
+    prefixes = [Path(sys.prefix).absolute()]
+
+    if py_path := os.getenv("PYTHONPATH"):
+        prefixes.extend(Path(p).absolute() for p in py_path.split(os.pathsep))
+
     candidates = set()
 
     for frame in inspect.stack(0):
-        file = Path(frame.filename)
+        file = Path(frame.filename).absolute()
 
-        if prefix not in file.parents:
+        if not any(file.is_relative_to(p) for p in prefixes):
             for parent in file.parents:
                 if parent not in candidates:
                     candidates.add(parent)
