@@ -12,3 +12,7 @@ from model_w.env_manager import EnvManager
 with EnvManager() as env:
     SOME_VALUE = env.get('SOME_VALUE', is_yaml=True, default=False)
 ```
+
+## Documentation
+
+[✨ **Documentation is there** ✨](http://modelw-env-manager.rtfd.io/)

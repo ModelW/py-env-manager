@@ -132,7 +132,9 @@ class EnvManager:
         self.build_mode_var = build_mode_var
         self.missing = set()
         self.syntax_error = set()
+        self.signature_mismatch = set()
         self.read = {}
+        self.get_signatures = {}
         self.preset = preset
         self.locals_to_change = locals_to_change
 
@@ -200,6 +202,14 @@ class EnvManager:
             Enables YAML parsing of the value
         """
 
+        signature = (default, build_default, is_yaml)
+
+        if name in self.get_signatures:
+            if signature != self.get_signatures[name]:
+                self.signature_mismatch.add(name)
+        else:
+            self.get_signatures[name] = signature
+
         if is_yaml is None:
             is_yaml = self.assume_yaml
 
@@ -240,7 +250,7 @@ class EnvManager:
         if self.get("NO_ENV_CHECK", is_yaml=True, default=False):
             return
 
-        if not self.missing and not self.syntax_error:
+        if not any([self.missing, self.syntax_error, self.signature_mismatch]):
             return
 
         parts = ["Incorrect environment variables."]
@@ -249,6 +259,11 @@ class EnvManager:
             parts.append(f' Missing: {", ".join(self.missing)}.')
 
         if self.syntax_error:
-            parts.append(f' Syntax error: {", ".join(self.missing)}.')
+            parts.append(f' Syntax error: {", ".join(self.syntax_error)}.')
+
+        if self.signature_mismatch:
+            parts.append(
+                f' get() calls mismatch: {", ".join(self.signature_mismatch)}.'
+            )
 
         raise ImproperlyConfigured("".join(parts))
