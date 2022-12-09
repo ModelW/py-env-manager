@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "modelw-env-manager"
-version = "1.0.0-alpha.5"
+version = "1.0.0b1"
 packages = [
     {  include = "model_w/env_manager", from = "src" }
 ]
@@ -9,7 +9,7 @@ description = "A tool to simplify reading environment variables and .env files"
 authors = ["Rémy Sanchez <remy.sanchez@hyperthese.net>"]
 license = "WTFPL"
 classifiers = [
-    "Development Status :: 3 - Alpha",
+    "Development Status :: 4 - Beta",
     "Framework :: Django",
     "Framework :: Django :: 3.2",
     "Framework :: Django :: 4",
