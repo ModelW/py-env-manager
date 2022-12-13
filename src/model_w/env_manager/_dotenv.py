@@ -69,7 +69,7 @@ def find_dotenv(file_name: str = ".env") -> Optional[Path]:
 
     prefixes = [Path(sys.prefix).absolute()]
 
-    if py_path := os.getenv("PYTHONPATH"):
+    if py_path := os.getenv("DOTENV_IGNORE_PATH"):
         prefixes.extend(Path(p).absolute() for p in py_path.split(os.pathsep))
 
     candidates = set()
