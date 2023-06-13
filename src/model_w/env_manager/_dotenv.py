@@ -103,6 +103,7 @@ def load_dotenv(dotenv_path: Union[str, Path, None] = None) -> bool:
     if dotenv_path is None:
         dotenv_path = find_dotenv()
 
-    dotenv = WDotEnv(dotenv_path=dotenv_path)
-
-    return dotenv.set_as_environment_variables()
+    if dotenv_path:
+        return WDotEnv(dotenv_path=dotenv_path).set_as_environment_variables()
+    else:
+        return True
