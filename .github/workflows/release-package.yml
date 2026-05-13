@@ -1,0 +1,39 @@
+name: Release Python package
+
+on:
+    push:
+        tags:
+            - "[0-9][0-9][0-9][0-9].[0-9][0-9]?.[0-9]+[ab]?[0-9]?[0-9]?[0-9]?[0-9]?"
+
+jobs:
+    build:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Install platform dependencies
+              run: sudo apt-get install -y libpq-dev
+
+            - name: Checkout
+              uses: actions/checkout@v6
+
+            - name: Setup Poetry
+              run: python -m pipx install poetry
+
+            - name: Setup Python
+              uses: actions/setup-python@v6
+              with:
+                  python-version: "3.14"
+                  cache: poetry
+
+            - name: Install dependencies
+              run: poetry install
+
+            - name: Build package
+              run: poetry build
+
+            - name: Configure Pypi publication
+              run: poetry config pypi-token.pypi $PYPI_TOKEN
+              env:
+                  PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}
+
+            - name: Publish package
+              run: poetry publish
