@@ -8,6 +8,9 @@ on:
 jobs:
     build:
         runs-on: ubuntu-latest
+        permissions:
+            contents: read
+            id-token: write
         steps:
             - name: Install platform dependencies
               run: sudo apt-get install -y libpq-dev
@@ -25,15 +28,10 @@ jobs:
                   cache: poetry
 
             - name: Install dependencies
-              run: poetry install
+              run: poetry install --no-interaction
 
             - name: Build package
-              run: poetry build
-
-            - name: Configure Pypi publication
-              run: poetry config pypi-token.pypi $PYPI_TOKEN
-              env:
-                  PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}
+              run: poetry build --no-interaction
 
             - name: Publish package
-              run: poetry publish
+              uses: pypa/gh-action-pypi-publish@release/v1
