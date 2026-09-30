@@ -7,20 +7,35 @@ guidelines. Specifically, this means that:
 
 - Git is managed using git-flow
 - You can format the code in any way you want as long as it matches the output
-  of `black` and `isort`
+  of `ruff format` and `ruff check --fix`
+- The code must be clean for `ruff check` and `mypy`
 - Everything needs to be documented
 
 Let's go about those things.
 
-## Formatting
+## Environment
 
-The code is formatted using `black` and `isort` that are "configured" at the
-root of this repo. While you can run the tools manually, it's fairly simple to
-rely on Makefile shortcut. From the root of the repo you can simply:
+Dependencies are managed with [uv](https://docs.astral.sh/uv/). To install the
+development environment, run from the root of the repo:
+
+```
+uv sync
+```
+
+## Formatting and linting
+
+The code is formatted and linted using `ruff`, and type-checked with `mypy`.
+While you can run the tools manually, it's simpler to rely on the Makefile
+shortcuts. From the root of the repo you can simply:
 
 ```
 make format
+make lint
 ```
+
+`make format` runs `ruff` in write mode, while `make lint` checks formatting,
+ruff rules and types without modifying anything. `make clean` chains both so
+the tree is ready to commit.
 
 ## Writing documentation
 

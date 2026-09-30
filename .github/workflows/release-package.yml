@@ -12,26 +12,14 @@ jobs:
             contents: read
             id-token: write
         steps:
-            - name: Install platform dependencies
-              run: sudo apt-get install -y libpq-dev
-
             - name: Checkout
               uses: actions/checkout@v6
 
-            - name: Setup Poetry
-              run: python -m pipx install poetry
-
-            - name: Setup Python
-              uses: actions/setup-python@v6
-              with:
-                  python-version: "3.14"
-                  cache: poetry
-
-            - name: Install dependencies
-              run: poetry install --no-interaction
+            - name: Setup uv
+              uses: astral-sh/setup-uv@v9.0.0
 
             - name: Build package
-              run: poetry build --no-interaction
+              run: uv build
 
             - name: Publish package
               uses: pypa/gh-action-pypi-publish@release/v1

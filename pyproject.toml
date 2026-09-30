@@ -1,13 +1,14 @@
-[tool.poetry]
+[project]
 name = "modelw-env-manager"
 version = "1.0.4"
-packages = [
-    {  include = "model_w/env_manager", from = "src" }
-]
-
 description = "A tool to simplify reading environment variables and .env files"
-authors = ["Rémy Sanchez <remy.sanchez@hyperthese.net>"]
-license = "WTFPL"
+readme = "README.md"
+license = { text = "WTFPL" }
+authors = [
+    { name = "Rémy Sanchez", email = "remy.sanchez@hyperthese.net" },
+]
+requires-python = ">=3.10,<4"
+keywords = ["django", "env", "configuration"]
 classifiers = [
     "Development Status :: 4 - Beta",
     "Framework :: Django",
@@ -19,27 +20,92 @@ classifiers = [
     "Topic :: Software Development :: Libraries",
     "Typing :: Typed",
 ]
+dependencies = [
+    "PyYAML>=6.0.1",
+    "python-dotenv>=0.11.0,<2.0",
+]
 
-readme = "README.md"
+[project.urls]
+Homepage = "https://github.com/ModelW/py-env-manager"
+Repository = "https://github.com/ModelW/py-env-manager"
 
-repository = "https://github.com/ModelW/py-env-manager"
-homepage = "https://github.com/ModelW/py-env-manager"
-
-keywords = ["django", "env", "configuration"]
-
-[tool.poetry.dependencies]
-python = "^3.8"
-PyYAML = ">=6.0.1"
-python-dotenv = ">=0.11.0,<2.0"
-
-[tool.poetry.dev-dependencies]
-isort = "*"
-black = "*"
-pytest = "^7.1.2"
+[dependency-groups]
+dev = [
+    "mypy>=1.19.1",
+    "pytest>=8.0",
+    "ruff>=0.15.0",
+    "types-PyYAML",
+]
 
 [build-system]
-requires = ["poetry-core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
-[tool.isort]
-profile = "black"
+[tool.hatch.build.targets.wheel]
+packages = ["src/model_w"]
+
+[tool.ruff]
+target-version = "py310"
+
+[tool.ruff.lint]
+select = [
+    # -- Core --
+    "E",  # pycodestyle (errors)
+    "W",  # pycodestyle (warnings)
+    "F",  # Pyflakes
+    "I",  # isort
+    "C90",  # McCabe Complexity
+    "D1",  # Mandatory docstrings
+    "S",  # Bandit
+
+    # -- Bonus --
+    "A",  # flake8-bugbear
+    "B",  # flake8-bugbear
+    "DTZ",  # date/time zone
+    "T10",  # debugger
+    "EM",  # error messages
+    "EXE",  # executable
+    "G",  # logging
+    "UP",  # pyupgrade
+    "ASYNC",  # async
+    "INP",  # PEP 420
+    "T20",  # no print
+    "PT",  # pytest
+    "SLOT",  # slots
+    "TCH",  # type checking blocks
+    "PTH",  # Use pathlib
+    "FIX",  # Don't allow not done stuff in code
+    "ERA",  # Don't comment code
+    "RUF",  # Ruff stuff
+    "TID251",  # Banned imports (See below)
+]
+
+[tool.ruff.lint.per-file-ignores]
+"test_*.py" = ["ARG001", "S101", "INP001"]
+"doc/source/conf.py" = ["INP001", "A001"]
+
+[tool.ruff.lint.isort]
+# Keep model_w imports in their own group even when the package isn't
+# installed in the linter's environment (same behavior as isort's
+# known_first_party).
+known-first-party = ["model_w"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "numpy"
+
+[tool.ruff.lint.flake8-tidy-imports.banned-api]
+"requests".msg = "Use `httpx` instead, which has timeouts by default."
+
+[tool.mypy]
+python_version = "3.10"
+mypy_path = "src"
+explicit_package_bases = true
+exclude = ["^\\.venv/", "^doc/build/"]
+
+[[tool.mypy.overrides]]
+module = ["django.*", "dotenv.*"]
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py", "*_test.py"]

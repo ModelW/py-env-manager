@@ -1,10 +1,11 @@
 import ctypes
 import inspect
+from collections.abc import MutableMapping
 from contextlib import contextmanager
 from io import StringIO
 from os import environ
 from pathlib import Path
-from typing import Any, MutableMapping, Optional, Union
+from typing import Any, Literal
 
 from yaml import YAMLError, safe_load
 
@@ -29,7 +30,7 @@ no_default = type(
 
 
 @contextmanager
-def get_caller_locals(context: Optional[MutableMapping[str, Any]] = None):
+def get_caller_locals(context: MutableMapping[str, Any] | None = None):
     """
     That's a context manager that allows you to get the locals of your caller
     and to modify it. It's CPython-dependent, uses black magic and is overall
@@ -56,6 +57,7 @@ def get_caller_locals(context: Optional[MutableMapping[str, Any]] = None):
     """
 
     frame = None
+    upper_locals: MutableMapping[str, Any]
 
     if context is None:
         stack = inspect.stack(0)
@@ -94,11 +96,11 @@ class EnvManager:
 
     def __init__(
         self,
-        preset: Preset = None,
-        dotenv_path: Union[str, Path, None, bool] = None,
+        preset: Preset | None = None,
+        dotenv_path: str | Path | Literal[False] | None = None,
         assume_yaml: bool = False,
         build_mode_var: str = "BUILD_MODE",
-        locals_to_change: Optional[MutableMapping[str, Any]] = None,
+        locals_to_change: MutableMapping[str, Any] | None = None,
     ) -> None:
         """
         Constructs the object
@@ -130,11 +132,11 @@ class EnvManager:
         self.dotenv_path = dotenv_path
         self.assume_yaml = assume_yaml
         self.build_mode_var = build_mode_var
-        self.missing = set()
-        self.syntax_error = set()
-        self.signature_mismatch = set()
-        self.read = {}
-        self.get_signatures = {}
+        self.missing: set[str] = set()
+        self.syntax_error: set[str] = set()
+        self.signature_mismatch: set[str] = set()
+        self.read: dict[str, Any] = {}
+        self.get_signatures: dict[str, Any] = {}
         self.preset = preset
         self.locals_to_change = locals_to_change
 
@@ -183,7 +185,7 @@ class EnvManager:
         name: str,
         default: Any = no_default,
         build_default: Any = no_default,
-        is_yaml: Optional[bool] = None,
+        is_yaml: bool | None = None,
     ) -> Any:
         """
         Gets a configured value
@@ -256,14 +258,14 @@ class EnvManager:
         parts = ["Incorrect environment variables."]
 
         if self.missing:
-            parts.append(f' Missing: {", ".join(self.missing)}.')
+            parts.append(f" Missing: {', '.join(self.missing)}.")
 
         if self.syntax_error:
-            parts.append(f' Syntax error: {", ".join(self.syntax_error)}.')
+            parts.append(f" Syntax error: {', '.join(self.syntax_error)}.")
 
         if self.signature_mismatch:
             parts.append(
-                f' get() calls mismatch: {", ".join(self.signature_mismatch)}.'
+                f" get() calls mismatch: {', '.join(self.signature_mismatch)}."
             )
 
         raise ImproperlyConfigured("".join(parts))

@@ -2,8 +2,8 @@ import inspect
 import os
 import re
 import sys
+from collections.abc import Iterator
 from pathlib import Path
-from typing import Iterator, Optional, Tuple, Union
 
 from dotenv.main import DotEnv
 from dotenv.parser import parse_stream
@@ -20,13 +20,13 @@ class WDotEnv(DotEnv):
     the lib.
     """
 
-    def parse(self) -> Iterator[Tuple[str, Optional[str]]]:
+    def parse(self) -> Iterator[tuple[str, str | None]]:
         """
         Same as the parent but ignoring errors on `set -a`.
         """
 
         with self._get_stream() as stream:
-            setattr(self, "_error_lines", [])
+            self._error_lines: list = []
 
             for binding in parse_stream(stream):
                 if binding.error:
@@ -44,7 +44,7 @@ class WDotEnv(DotEnv):
         return getattr(self, "_error_lines", [])
 
 
-def find_dotenv(file_name: str = ".env") -> Optional[Path]:
+def find_dotenv(file_name: str = ".env") -> Path | None:
     """
     The algorithm from the original find_dotenv is not working for our case so
     we're coding it again here.
@@ -86,8 +86,10 @@ def find_dotenv(file_name: str = ".env") -> Optional[Path]:
         if (out := candidate / file_name).is_file():
             return out
 
+    return None
 
-def load_dotenv(dotenv_path: Union[str, Path, None] = None) -> bool:
+
+def load_dotenv(dotenv_path: str | Path | None = None) -> bool:
     """
     Finds, parses and loads as default the .env file for this project.
 

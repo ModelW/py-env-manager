@@ -1,12 +1,25 @@
-PYTHON_BIN ?= poetry run python
+.PHONY: help format lint typecheck test clean
 
-format: isort black
+PYTHON_BIN ?= uv run python
 
-black:
-	$(PYTHON_BIN) -m black --exclude '/(\.git|\.hg|\.mypy_cache|\.nox|\.tox|\.venv|_build|buck-out|build|dist|node_modules|webpack_bundles)/' .
+help: ## Show this help
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
-isort:
-	$(PYTHON_BIN) -m isort src doc tests
+format: ## Format all Python code (ruff: import sorting + formatting)
+	$(PYTHON_BIN) -m ruff check --fix --select I .
+	$(PYTHON_BIN) -m ruff format .
+
+lint: typecheck ## Lint (ruff) and type-check all Python code
+	$(PYTHON_BIN) -m ruff check .
+	$(PYTHON_BIN) -m ruff format --check .
+
+typecheck: ## Type-check with mypy
+	$(PYTHON_BIN) -m mypy .
+
+test: ## Run the test suite
+	uv run pytest
+
+clean: format lint ## Format then lint everything
 
 check_release:
 ifndef VERSION

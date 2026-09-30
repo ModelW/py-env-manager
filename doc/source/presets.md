@@ -48,12 +48,13 @@ Presets just need to implement the `Preset` interface. It simply has two hooks
 from model_w.env_manager import Preset
 from typing import MutableMapping, Any
 
+
 class I18nPreset(Preset):
     def pre(self, env: "EnvManager", context: MutableMapping[str, Any]):
-        context['USE_I18N'] = True
+        context["USE_I18N"] = True
 
     def post(self, env: "EnvManager", context: MutableMapping[str, Any]):
-        context['LANGUAGE_CODE'] = context['LANGUAGES'][0][0]
+        context["LANGUAGE_CODE"] = context["LANGUAGES"][0][0]
 ```
 
 Here in the `pre` hook we define static values while in the `post` hook we
@@ -71,13 +72,14 @@ Maybe you want also to have a preset to set the time zone. Let's call it the
 from model_w.env_manager import Preset
 from typing import MutableMapping, Any
 
+
 class TzPreset(Preset):
     def __init__(self, tz: str):
         self.tz = tz
 
     def post(self, env: "EnvManager", context: MutableMapping[str, Any]):
-        context['USE_TZ'] = True
-        context['TIME_ZONE'] = self.tz
+        context["USE_TZ"] = True
+        context["TIME_ZONE"] = self.tz
 ```
 
 Here we just set enable the time zone management and we make sure to set the
@@ -89,7 +91,7 @@ Now how do you compose this with the other one?
 from model_w.env_manager import EnvManager, ComposePreset
 from your_package.conf import I18nPreset, TzPreset
 
-with EnvManager(ComposePreset(I18nPreset(), TzPreset('UTC'))):
+with EnvManager(ComposePreset(I18nPreset(), TzPreset("UTC"))):
     LANGUAGES = [
         ("en", "English"),
         ("fr", "French"),
@@ -107,15 +109,16 @@ For example, this demo preset:
 ```python
 from model_w.env_manager import AutoPreset
 
+
 class FooFoo(AutoPreset):
     def pre_foo(self):
-        yield 'FOO', 42
+        yield "FOO", 42
 
     def pre_bar(self):
-        yield 'BAR', 24
+        yield "BAR", 24
 
     def post_foo_bar(self, context):
-        yield 'FOO_BAR', context['FOO'] + context['BAR']
+        yield "FOO_BAR", context["FOO"] + context["BAR"]
 ```
 
 All you need to do is:

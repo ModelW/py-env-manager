@@ -3,6 +3,7 @@
 *.swp
 .python-version
 *.pyc
+/.venv/
 /dist
 *.egg-info
 .DS_Store
@@ -14,3 +15,6 @@ celerybeat-schedule.*
 .vscode
 *.sqlite3
 /doc/build/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/

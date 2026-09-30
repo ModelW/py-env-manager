@@ -1,4 +1,5 @@
-from typing import TYPE_CHECKING, Any, Iterator, MutableMapping
+from collections.abc import Iterator, MutableMapping
+from typing import TYPE_CHECKING, Any
 
 from ._utils import loose_call
 

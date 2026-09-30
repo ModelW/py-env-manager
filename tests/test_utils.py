@@ -1,7 +1,11 @@
-from model_w.env_manager._utils import loose_call  # noqa
+"""Tests for the `loose_call` helper."""
+
+from model_w.env_manager._utils import loose_call
 
 
 def test_loose_call():
+    """Only the kwargs accepted by the function are forwarded to it."""
+
     def foo(bar=42):
         return bar
 
